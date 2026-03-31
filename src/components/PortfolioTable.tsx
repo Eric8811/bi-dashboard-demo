@@ -71,48 +71,77 @@ export function PortfolioTable({ columns, rows, emptyMessage }: PortfolioTablePr
     )
   }
 
-  return (
-    <div className="-mx-2 overflow-x-auto px-2">
-      <table className="min-w-[1100px] w-full border-separate border-spacing-y-2 text-left">
-        <thead>
-          <tr className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                className={`px-4 py-2 ${column.align === 'right' ? 'text-right' : ''}`}
-              >
-                {column.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.id} className="group">
-              {columns.map((column, index) => {
-                const isFirst = index === 0
-                const isLast = index === columns.length - 1
-                const rounding = isFirst
-                  ? 'rounded-l-2xl border-r-0'
-                  : isLast
-                    ? 'rounded-r-2xl border-l-0'
-                    : 'border-x-0'
+  const [primaryColumn, ...detailColumns] = columns
 
-                return (
-                  <td
-                    key={column.key}
-                    className={`border border-white/10 bg-slate-950/45 px-4 py-4 align-top transition duration-300 group-hover:border-white/15 group-hover:bg-slate-950/60 ${rounding} ${
-                      column.align === 'right' ? 'text-right' : ''
-                    }`}
-                  >
-                    {renderCell(row.cells[column.key])}
-                  </td>
-                )
-              })}
+  return (
+    <>
+      <div className="space-y-3 md:hidden">
+        {rows.map((row) => (
+          <article
+            key={row.id}
+            className="rounded-3xl border border-white/10 bg-slate-950/45 p-4 transition duration-300 hover:border-white/15 hover:bg-slate-950/60"
+          >
+            <div>{renderCell(row.cells[primaryColumn.key])}</div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {detailColumns.map((column) => (
+                <div
+                  key={column.key}
+                  className="rounded-2xl border border-white/10 bg-white/[0.035] px-3.5 py-3"
+                >
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {column.label}
+                  </div>
+                  <div className="mt-2 text-sm">{renderCell(row.cells[column.key])}</div>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="-mx-2 hidden overflow-x-auto px-2 md:block">
+        <table className="min-w-[1100px] w-full border-separate border-spacing-y-2 text-left">
+          <thead>
+            <tr className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              {columns.map((column) => (
+                <th
+                  key={column.key}
+                  className={`px-4 py-2 ${column.align === 'right' ? 'text-right' : ''}`}
+                >
+                  {column.label}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="group">
+                {columns.map((column, index) => {
+                  const isFirst = index === 0
+                  const isLast = index === columns.length - 1
+                  const rounding = isFirst
+                    ? 'rounded-l-2xl border-r-0'
+                    : isLast
+                      ? 'rounded-r-2xl border-l-0'
+                      : 'border-x-0'
+
+                  return (
+                    <td
+                      key={column.key}
+                      className={`border border-white/10 bg-slate-950/45 px-4 py-4 align-top transition duration-300 group-hover:border-white/15 group-hover:bg-slate-950/60 ${rounding} ${
+                        column.align === 'right' ? 'text-right' : ''
+                      }`}
+                    >
+                      {renderCell(row.cells[column.key])}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }

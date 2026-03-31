@@ -19,7 +19,7 @@ export function FilterSelect({
   onChange,
 }: FilterSelectProps) {
   return (
-    <label className="rounded-2xl border border-white/10 bg-slate-950/45 px-4 py-3 transition duration-300 hover:border-white/15 hover:bg-slate-950/60">
+    <label className="min-w-0 rounded-2xl border border-white/10 bg-slate-950/45 px-4 py-3 transition duration-300 hover:border-white/15 hover:bg-slate-950/60">
       <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
         {label}
       </div>
@@ -27,7 +27,7 @@ export function FilterSelect({
         <select
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full appearance-none bg-transparent pr-8 text-sm font-medium text-white outline-none"
+          className="w-full appearance-none bg-transparent pr-8 text-sm font-medium text-white outline-none sm:text-[15px]"
         >
           {options.map((option) => (
             <option key={option.value} value={option.value} className="bg-slate-950 text-white">

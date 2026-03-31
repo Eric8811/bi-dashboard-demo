@@ -107,7 +107,19 @@ function getTooltipFormatter(format: ValueFormat) {
   return formatTooltipPercent
 }
 
-function getYAxisWidth(format: ValueFormat) {
+function getYAxisWidth(format: ValueFormat, isMobile: boolean) {
+  if (isMobile) {
+    if (format === 'currency') {
+      return 40
+    }
+
+    if (format === 'roi') {
+      return 36
+    }
+
+    return 32
+  }
+
   if (format === 'currency') {
     return 52
   }
@@ -119,10 +131,25 @@ function getYAxisWidth(format: ValueFormat) {
   return 44
 }
 
+function getBarAxisWidth(isMobile: boolean, isTablet: boolean) {
+  if (isMobile) {
+    return 86
+  }
+
+  if (isTablet) {
+    return 112
+  }
+
+  return 148
+}
+
 function App() {
   const [language, setLanguage] = useState<Language>('en')
   const [role, setRole] = useState<Role>('executive')
   const [filters, setFilters] = useState(defaultFilters)
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window === 'undefined' ? 1280 : window.innerWidth,
+  )
 
   const copy = getDashboardCopy(language)
   const roleCopy = copy.roles[role]
@@ -132,6 +159,8 @@ function App() {
   const localizedChannelOptions = getLocalizedOptions(language, 'channel', channelOptions)
   const localizedRegionOptions = getLocalizedOptions(language, 'region', regionOptions)
   const localizedRoleOptions = getLocalizedRoleOptions(language)
+  const isMobile = viewportWidth < 768
+  const isTablet = viewportWidth < 1280
   const languageOptions = [
     { value: 'en', label: copy.languages.en },
     { value: 'zh', label: copy.languages.zh },
@@ -148,13 +177,24 @@ function App() {
     document.title = `${copy.pageTitle} · ${roleCopy.label}`
   }, [copy.pageTitle, roleCopy.label])
 
+  useEffect(() => {
+    function handleResize() {
+      setViewportWidth(window.innerWidth)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   return (
     <div className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-[-14rem] h-[26rem] bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.18),transparent_58%)]" />
       <div className="pointer-events-none absolute right-[-8rem] top-[14rem] h-80 w-80 rounded-full bg-emerald-300/10 blur-3xl" />
 
-      <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+      <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
               {copy.shell.subtitle}
@@ -164,7 +204,7 @@ function App() {
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 xl:justify-end">
+          <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:justify-end">
             <SegmentedControl
               label={copy.toolbar.role}
               value={role}
@@ -180,21 +220,21 @@ function App() {
           </div>
         </header>
 
-        <SurfaceCard className="overflow-hidden p-6 sm:p-8" interactive={false}>
+        <SurfaceCard className="overflow-hidden p-5 sm:p-8" interactive={false}>
           <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.15),transparent_55%)] lg:block" />
 
-          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,420px)] xl:items-start">
+          <div className="relative grid gap-6 sm:gap-8 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,420px)] xl:items-start">
             <div className="max-w-3xl">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-100">
                 <TrendingUp className="h-4 w-4" />
                 {roleCopy.hero.badge}
               </div>
 
-              <h2 className="max-w-3xl font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+              <h2 className="max-w-3xl font-display text-3xl font-semibold tracking-tight leading-tight text-white sm:text-5xl">
                 {roleCopy.hero.title}
               </h2>
 
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-lg">
                 {roleCopy.hero.description}
               </p>
 
@@ -202,7 +242,7 @@ function App() {
                 {dashboard.scopeBadges.map((badge) => (
                   <div
                     key={badge}
-                    className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200"
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 sm:px-4 sm:py-2 sm:text-sm"
                   >
                     {badge}
                   </div>
@@ -245,7 +285,7 @@ function App() {
           </div>
         </SurfaceCard>
 
-        <section className="mt-6 grid gap-3 lg:grid-cols-4">
+        <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <FilterSelect
             label={copy.filters.dateRange}
             value={filters.dateRange}
@@ -272,7 +312,7 @@ function App() {
           />
         </section>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {dashboard.executiveSummary.map((item) => (
             <SurfaceCard key={item.title} className="p-5" interactive={false}>
               <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -284,7 +324,7 @@ function App() {
           ))}
         </section>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {dashboard.metricCards.map((card) => (
             <MetricCard
               key={card.title}
@@ -314,7 +354,7 @@ function App() {
               </div>
             </div>
 
-            <div className="mt-6 h-80">
+            <div className="mt-6 h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={dashboard.areaChart.data}>
                   <defs>
@@ -338,8 +378,8 @@ function App() {
                     tickFormatter={getTickFormatter(dashboard.areaChart.format)}
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12 }}
-                    width={getYAxisWidth(dashboard.areaChart.format)}
+                    tick={{ fill: '#94a3b8', fontSize: isMobile ? 11 : 12 }}
+                    width={getYAxisWidth(dashboard.areaChart.format, isMobile)}
                   />
                   <Tooltip
                     contentStyle={{
@@ -428,24 +468,28 @@ function App() {
               <div className="text-sm text-slate-400">{roleCopy.sections.barSubtitle}</div>
             </div>
 
-            <div className="mt-6 h-80">
+            <div className="mt-6 h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dashboard.barChart.data} layout="vertical" margin={{ left: 18 }}>
+                <BarChart
+                  data={dashboard.barChart.data}
+                  layout="vertical"
+                  margin={{ left: isMobile ? 4 : 18, right: isMobile ? 6 : 12 }}
+                >
                   <CartesianGrid horizontal={false} stroke="rgba(148, 163, 184, 0.14)" />
                   <XAxis
                     type="number"
                     tickFormatter={getTickFormatter(dashboard.barChart.format)}
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12 }}
+                    tick={{ fill: '#94a3b8', fontSize: isMobile ? 11 : 12 }}
                   />
                   <YAxis
                     dataKey="label"
                     type="category"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: '#cbd5e1', fontSize: 12 }}
-                    width={148}
+                    tick={{ fill: '#cbd5e1', fontSize: isMobile ? 11 : 12 }}
+                    width={getBarAxisWidth(isMobile, isTablet)}
                   />
                   <Tooltip
                     cursor={{ fill: 'rgba(56, 189, 248, 0.08)' }}
@@ -500,7 +544,7 @@ function App() {
               </div>
             </div>
 
-            <div className="mt-6 h-80">
+            <div className="mt-6 h-64 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dashboard.lineChart.data}>
                   <CartesianGrid vertical={false} stroke="rgba(148, 163, 184, 0.14)" />
@@ -514,8 +558,8 @@ function App() {
                     tickFormatter={getTickFormatter(dashboard.lineChart.format)}
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12 }}
-                    width={getYAxisWidth(dashboard.lineChart.format)}
+                    tick={{ fill: '#94a3b8', fontSize: isMobile ? 11 : 12 }}
+                    width={getYAxisWidth(dashboard.lineChart.format, isMobile)}
                   />
                   <Tooltip
                     contentStyle={{
