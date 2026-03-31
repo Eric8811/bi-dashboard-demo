@@ -18,11 +18,12 @@ export function SurfaceCard({
   return (
     <section
       className={joinClasses(
-        'group relative rounded-[28px] border border-white/10 bg-white/[0.045] shadow-panel backdrop-blur-xl transition duration-300',
-        interactive && 'hover:-translate-y-0.5 hover:border-white/15 hover:bg-white/[0.06]',
+        'group relative overflow-hidden rounded-[22px] border border-white/8 bg-slate-950/55 shadow-[0_18px_48px_rgba(2,6,23,0.28)] backdrop-blur-md transition duration-300 sm:rounded-[26px]',
+        interactive && 'hover:-translate-y-0.5 hover:border-white/15 hover:bg-slate-950/62',
         className,
       )}
     >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-white/18 via-white/6 to-transparent" />
       {children}
     </section>
   )

@@ -21,7 +21,7 @@ export function SegmentedControl({
       <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
         {label}
       </span>
-      <div className="inline-flex flex-wrap rounded-full border border-white/10 bg-slate-950/65 p-1 backdrop-blur">
+      <div className="inline-flex flex-wrap rounded-full border border-white/10 bg-white/[0.03] p-1 backdrop-blur">
         {options.map((option) => (
           <button
             key={option.value}
@@ -30,7 +30,7 @@ export function SegmentedControl({
             aria-pressed={value === option.value}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold transition sm:px-3.5 ${
               value === option.value
-                ? 'bg-white text-slate-950'
+                ? 'bg-white text-slate-950 shadow-[0_8px_20px_rgba(15,23,42,0.18)]'
                 : 'text-slate-300 hover:text-white'
             }`}
           >

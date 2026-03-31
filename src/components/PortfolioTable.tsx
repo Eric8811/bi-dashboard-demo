@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { ChevronRight } from 'lucide-react'
 import type {
   PortfolioTableCell,
   PortfolioTableColumn,
@@ -8,6 +10,8 @@ type PortfolioTableProps = {
   columns: PortfolioTableColumn[]
   rows: PortfolioTableRow[]
   emptyMessage: string
+  moreLabel: string
+  lessLabel: string
 }
 
 const badgeStyles = {
@@ -62,7 +66,49 @@ function renderCell(cell: PortfolioTableCell) {
   }
 }
 
-export function PortfolioTable({ columns, rows, emptyMessage }: PortfolioTableProps) {
+function renderCompactCell(cell: PortfolioTableCell) {
+  switch (cell.kind) {
+    case 'badge':
+      return (
+        <span
+          className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-[0.14em] ${badgeStyles[cell.tone]}`}
+        >
+          {cell.primary}
+        </span>
+      )
+    case 'metric':
+      return (
+        <>
+          <div className={`text-base font-semibold ${metricToneStyles[cell.tone ?? 'default']}`}>{cell.primary}</div>
+          {cell.secondary ? <div className="mt-1 text-xs text-slate-500">{cell.secondary}</div> : null}
+        </>
+      )
+    case 'text':
+      return (
+        <>
+          <div className={cell.tone === 'muted' ? 'text-slate-300' : 'text-white'}>{cell.primary}</div>
+          {cell.secondary ? <div className="mt-1 text-xs text-slate-500">{cell.secondary}</div> : null}
+        </>
+      )
+    case 'app':
+      return (
+        <>
+          <div className="font-medium text-white">{cell.primary}</div>
+          <div className="mt-1 text-xs text-slate-500">{cell.secondary}</div>
+        </>
+      )
+  }
+}
+
+export function PortfolioTable({
+  columns,
+  rows,
+  emptyMessage,
+  moreLabel,
+  lessLabel,
+}: PortfolioTableProps) {
+  const [expandedRow, setExpandedRow] = useState<string | null>(null)
+
   if (!rows.length) {
     return (
       <div className="rounded-3xl border border-dashed border-white/10 bg-slate-950/35 px-6 py-10 text-center text-sm text-slate-400">
@@ -76,28 +122,74 @@ export function PortfolioTable({ columns, rows, emptyMessage }: PortfolioTablePr
   return (
     <>
       <div className="space-y-3 md:hidden">
-        {rows.map((row) => (
-          <article
-            key={row.id}
-            className="rounded-3xl border border-white/10 bg-slate-950/45 p-4 transition duration-300 hover:border-white/15 hover:bg-slate-950/60"
-          >
-            <div>{renderCell(row.cells[primaryColumn.key])}</div>
+        {rows.map((row) => {
+          const isOpen = expandedRow === row.id
+          const statusColumn = detailColumns.find((column) => column.key === 'status')
+          const compactColumns = detailColumns
+            .filter((column) => column.key !== 'status')
+            .slice(0, 3)
+          const remainingColumns = detailColumns.filter(
+            (column) => column.key !== 'status' && !compactColumns.some((item) => item.key === column.key),
+          )
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {detailColumns.map((column) => (
-                <div
-                  key={column.key}
-                  className="rounded-2xl border border-white/10 bg-white/[0.035] px-3.5 py-3"
-                >
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    {column.label}
+          return (
+            <article
+              key={row.id}
+              className="rounded-[22px] border border-white/10 bg-slate-950/50 p-4 transition duration-300 hover:border-white/15 hover:bg-slate-950/62"
+            >
+              <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-3">
+                <div className="min-w-0 flex-1">{renderCell(row.cells[primaryColumn.key])}</div>
+                {statusColumn ? <div className="shrink-0">{renderCompactCell(row.cells[statusColumn.key])}</div> : null}
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-2.5 min-[420px]:grid-cols-3">
+                {compactColumns.map((column) => (
+                  <div
+                    key={column.key}
+                    className="rounded-[18px] border border-white/10 bg-white/[0.03] px-3 py-3"
+                  >
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      {column.label}
+                    </div>
+                    <div className="mt-2 text-sm">{renderCompactCell(row.cells[column.key])}</div>
                   </div>
-                  <div className="mt-2 text-sm">{renderCell(row.cells[column.key])}</div>
-                </div>
-              ))}
-            </div>
-          </article>
-        ))}
+                ))}
+              </div>
+
+              {remainingColumns.length ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setExpandedRow(isOpen ? null : row.id)}
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-slate-300"
+                    aria-expanded={isOpen}
+                  >
+                    {isOpen ? lessLabel : moreLabel}
+                    <ChevronRight
+                      className={`h-3.5 w-3.5 transition ${isOpen ? 'rotate-90 text-slate-200' : 'text-slate-500'}`}
+                    />
+                  </button>
+
+                  {isOpen ? (
+                    <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                      {remainingColumns.map((column) => (
+                        <div
+                          key={column.key}
+                          className="flex items-start justify-between gap-3 rounded-[18px] border border-white/10 bg-white/[0.02] px-3 py-3"
+                        >
+                          <div className="max-w-[42%] text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            {column.label}
+                          </div>
+                          <div className="min-w-0 flex-1 text-right text-sm">{renderCompactCell(row.cells[column.key])}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+            </article>
+          )
+        })}
       </div>
 
       <div className="-mx-2 hidden overflow-x-auto px-2 md:block">

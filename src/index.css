@@ -27,10 +27,12 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
   background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 28%),
-    radial-gradient(circle at top right, rgba(251, 191, 36, 0.14), transparent 24%),
-    linear-gradient(180deg, #020617 0%, #08101f 48%, #0f172a 100%);
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 26%),
+    radial-gradient(circle at 85% 12%, rgba(16, 185, 129, 0.08), transparent 20%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.05), transparent 24%),
+    linear-gradient(180deg, #020617 0%, #07111f 44%, #0b1323 100%);
 }
 
 body::before {
@@ -39,10 +41,10 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 78%);
+    linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 80%);
 }
 
 ::selection {
@@ -52,4 +54,13 @@ body::before {
 
 #root {
   min-height: 100vh;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
